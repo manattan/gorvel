@@ -1,0 +1,12 @@
+version: "3"
+services:
+  app-dev:
+    container_name: app-dev
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: /gorvel
+    volumes:
+      - .:/go/src/github.com/manattan/gorvel
+    ports:
+      - 1323:1323

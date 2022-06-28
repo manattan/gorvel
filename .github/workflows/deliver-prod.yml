@@ -1,0 +1,49 @@
+name: "deploy prod environment"
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      GCLOUD_PROJECT: gorvel
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+      GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v0
+        with:
+          project_id: ${{ env.GCLOUD_PROJECT }}
+          service_account_key: ${{ env.GCP_SA_KEY }}
+          export_default_credentials: true
+
+      - name: Build
+        run: make build
+
+      - name: Deploy
+        run: make deploy
+
+      - uses: rtCamp/action-slack-notify@v2
+        if: ${{ success() }}
+        env:
+          SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
+          SLACK_USERNAME: Github Actions
+          SLACK_ICON_EMOJI: ":hammer:"
+          SLACK_COLOR: "#008DA3"
+          SLACK_MESSAGE: "gorvel app deploy succeeded! https://gorvel-server-p63j7yvmrq-an.a.run.app/"
+
+      - uses: rtCamp/action-slack-notify@v2
+        if: ${{ failure() }}
+        env:
+          SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK }}
+          SLACK_USERNAME: Github Actions
+          SLACK_ICON_EMOJI: ":hammer:"
+          SLACK_COLOR: "#ff0000"
+          SLACK_MESSAGE: "gorvel app deploy failed."
