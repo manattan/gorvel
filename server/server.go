@@ -17,7 +17,7 @@ func health(c echo.Context) error {
 	return c.JSON(http.StatusOK, &HealthCheckResponse{
 		Message: "health!",
 	})
-  }
+}
 
 func NewServer() (*echo.Echo, error) {
 	verifyToken := os.Getenv("SLACK_VERIFY_TOKEN")
@@ -26,7 +26,7 @@ func NewServer() (*echo.Echo, error) {
 	if verifyToken == "" || botToken == "" {
 		return nil, fmt.Errorf("slack env is empty")
 	}
- 
+
 	e := echo.New()
 
 	e.Use(middleware.Logger())
