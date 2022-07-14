@@ -1,23 +1,19 @@
 package main
 
 import (
-	"net/http"
+	"log"
 
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"github.com/manattan/gorvel/server"
 )
 
-func hello(c echo.Context) error {
-	return c.String(http.StatusOK, "Hello, World!")
-  }
-
 func main() {
-	e := echo.New()
+	s, err := server.NewServer()
+	if err != nil {
+		log.Fatalln(err)
+	}
 
-	e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
-	e.Use(middleware.CORS())
-
-	e.GET("/", hello)
-	e.Logger.Fatal(e.Start(":1323"))
+	err = s.Start(":1323")
+	if err != nil {
+		log.Fatalln(err)
+	}
 }

@@ -1,7 +1,6 @@
 version: "3"
 services:
-  app-dev:
-    container_name: app-dev
+  gorvel-dev:
     build:
       context: .
       dockerfile: Dockerfile
