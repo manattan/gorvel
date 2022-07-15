@@ -2,10 +2,14 @@ module github.com/manattan/gorvel
 
 go 1.17
 
-require github.com/labstack/echo/v4 v4.7.2
+require (
+	github.com/labstack/echo/v4 v4.7.2
+	github.com/slack-go/slack v0.11.0
+)
 
 require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
+	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/labstack/gommon v0.3.1 // indirect
 	github.com/mattn/go-colorable v0.1.11 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect

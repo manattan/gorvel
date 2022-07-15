@@ -7,6 +7,8 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/manattan/gorvel/handler"
+	"github.com/slack-go/slack"
 )
 
 type HealthCheckResponse struct {
@@ -27,6 +29,14 @@ func NewServer() (*echo.Echo, error) {
 		return nil, fmt.Errorf("slack env is empty")
 	}
 
+	client := slack.New(botToken)
+	_, err := client.AuthTest()
+	if err != nil {
+		return nil, err
+	}
+
+	eventHandler := handler.NewEventHandler(verifyToken)
+
 	e := echo.New()
 
 	e.Use(middleware.Logger())
@@ -34,6 +44,7 @@ func NewServer() (*echo.Echo, error) {
 	e.Use(middleware.CORS())
 
 	e.GET("/healthCheck", health)
+	e.GET("/events", eventHandler.HandleEvent)
 
 	return e, nil
 }
