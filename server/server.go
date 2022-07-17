@@ -2,7 +2,6 @@ package server
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 
@@ -12,7 +11,6 @@ import (
 	"github.com/manattan/gorvel/repository"
 	"github.com/manattan/gorvel/usecase"
 	"github.com/slack-go/slack"
-	"github.com/slack-go/slack/slackevents"
 )
 
 type HealthCheckResponse struct {
@@ -20,9 +18,9 @@ type HealthCheckResponse struct {
 }
 
 func health(c echo.Context) error {
-	var r *slackevents.ChallengeResponse
-	log.Println(r)
-	return c.JSON(http.StatusOK, &r)
+	return c.JSON(http.StatusOK, &HealthCheckResponse{
+		Message: "ok",
+	})
 }
 
 func NewServer() (*echo.Echo, error) {
