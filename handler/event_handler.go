@@ -1,9 +1,10 @@
 package handler
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 
@@ -23,14 +24,15 @@ func NewEventHandler(eu *usecase.EventUseCase, signingSecret string) *EventHandl
 }
 
 func (h *EventHandler) HandleEvent(c echo.Context) error {
-	defer c.Request().Body.Close()
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(c.Request().Body)
-	body := buf.String()
-
 	header := c.Request().Header
 
 	verifier, err := slack.NewSecretsVerifier(header, h.signingSecret)
+	if err != nil {
+		return fmt.Errorf("could not verify as slack: %v", err)
+	}
+
+	bodyReader := io.TeeReader(c.Request().Body, &verifier)
+	body, err := ioutil.ReadAll(bodyReader)
 	if err != nil {
 		return fmt.Errorf("could not verify as slack: %v", err)
 	}
