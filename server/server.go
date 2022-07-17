@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 
@@ -11,6 +12,7 @@ import (
 	"github.com/manattan/gorvel/repository"
 	"github.com/manattan/gorvel/usecase"
 	"github.com/slack-go/slack"
+	"github.com/slack-go/slack/slackevents"
 )
 
 type HealthCheckResponse struct {
@@ -18,16 +20,16 @@ type HealthCheckResponse struct {
 }
 
 func health(c echo.Context) error {
-	return c.JSON(http.StatusOK, &HealthCheckResponse{
-		Message: "health!",
-	})
+	var r *slackevents.ChallengeResponse
+	log.Println(r)
+	return c.JSON(http.StatusOK, &r)
 }
 
 func NewServer() (*echo.Echo, error) {
-	verifyToken := os.Getenv("SLACK_VERIFY_TOKEN")
+	signingSecret := os.Getenv("SLACK_SIGNING_SECRET")
 	botToken := os.Getenv("SLACK_BOT_TOKEN")
 
-	if verifyToken == "" || botToken == "" {
+	if signingSecret == "" || botToken == "" {
 		return nil, fmt.Errorf("slack env is empty")
 	}
 
@@ -41,7 +43,7 @@ func NewServer() (*echo.Echo, error) {
 
 	eu := usecase.NewEventUseCase(sr)
 
-	eventHandler := handler.NewEventHandler(eu, verifyToken)
+	eventHandler := handler.NewEventHandler(eu, signingSecret)
 
 	e := echo.New()
 
@@ -50,7 +52,7 @@ func NewServer() (*echo.Echo, error) {
 	e.Use(middleware.CORS())
 
 	e.GET("/healthCheck", health)
-	e.GET("/events", eventHandler.HandleEvent)
+	e.POST("/events", eventHandler.HandleEvent)
 
 	return e, nil
 }

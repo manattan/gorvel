@@ -10,7 +10,7 @@ type SlackRepository struct {
 	client *slack.Client
 }
 
-func NewSlackRepository (client *slack.Client) *SlackRepository {
+func NewSlackRepository(client *slack.Client) *SlackRepository {
 	return &SlackRepository{client}
 }
 
