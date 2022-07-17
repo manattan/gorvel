@@ -8,6 +8,8 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/manattan/gorvel/handler"
+	"github.com/manattan/gorvel/repository"
+	"github.com/manattan/gorvel/usecase"
 	"github.com/slack-go/slack"
 )
 
@@ -35,7 +37,11 @@ func NewServer() (*echo.Echo, error) {
 		return nil, err
 	}
 
-	eventHandler := handler.NewEventHandler(verifyToken)
+	sr := repository.NewSlackRepository(client)
+
+	eu := usecase.NewEventUseCase(sr)
+
+	eventHandler := handler.NewEventHandler(eu, verifyToken)
 
 	e := echo.New()
 
