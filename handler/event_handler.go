@@ -40,6 +40,8 @@ func (h *EventHandler) HandleEvent (c echo.Context) error {
 		}
 	}
 
+	h.eu.InvokeEvent(&evt)
+
 	log.Println("Call event usecase with:", evt)
 	return c.String(http.StatusOK, "handle event")
 }
