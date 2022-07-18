@@ -24,10 +24,10 @@ func health(c echo.Context) error {
 }
 
 func NewServer() (*echo.Echo, error) {
-	verifyToken := os.Getenv("SLACK_VERIFY_TOKEN")
 	botToken := os.Getenv("SLACK_BOT_TOKEN")
+	signingSecret := os.Getenv("SLACK_SIGNING_SECRET")
 
-	if verifyToken == "" || botToken == "" {
+	if signingSecret == "" || botToken == "" {
 		return nil, fmt.Errorf("slack env is empty")
 	}
 
@@ -41,7 +41,7 @@ func NewServer() (*echo.Echo, error) {
 
 	eu := usecase.NewEventUseCase(sr)
 
-	eventHandler := handler.NewEventHandler(eu, verifyToken)
+	eventHandler := handler.NewEventHandler(eu, signingSecret)
 
 	e := echo.New()
 

@@ -1,38 +1,54 @@
 package handler
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 	"github.com/manattan/gorvel/usecase"
+	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
 )
 
 type EventHandler struct {
 	eu            *usecase.EventUseCase
-	verifyToken string
+	signingSecret string
 }
 
-func NewEventHandler(eu *usecase.EventUseCase, verifyToken string) *EventHandler {
-	return &EventHandler{eu, verifyToken}
+func NewEventHandler(eu *usecase.EventUseCase, signingSecret string) *EventHandler {
+	return &EventHandler{eu, signingSecret}
 }
 
 func (h *EventHandler) HandleEvent(c echo.Context) error {
-	defer c.Request().Body.Close()
+	body, err := ioutil.ReadAll(c.Request().Body)
+	if err != nil {
+		fmt.Printf("%v", body)
+		return fmt.Errorf("read all error: %v", err)
+	}
 
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(c.Request().Body)
-	body := buf.String()
+	sv, err := slack.NewSecretsVerifier(c.Request().Header, h.signingSecret)
+	if err != nil {
+		fmt.Printf("%v", sv)
+		return fmt.Errorf("secrets verify error: %v", err)
+	}
 
-	evt, err := slackevents.ParseEvent(json.RawMessage(body), slackevents.OptionVerifyToken(&slackevents.TokenComparator{VerificationToken: h.verifyToken}))
+	if _, err := sv.Write(body); err != nil {
+		fmt.Printf("%v", sv)
+		return fmt.Errorf("write error: %v", err)
+	}
+
+	if err := sv.Ensure(); err != nil {
+		fmt.Printf("%v", sv)
+		return fmt.Errorf("ensure error: %v", err)
+	}
+	
+	evt, err := slackevents.ParseEvent(json.RawMessage(body), slackevents.OptionNoVerifyToken())
 	if err != nil {
 		return fmt.Errorf("could not parse event JSON: %v", err)
 	}
-
 	if evt.Type == slackevents.URLVerification {
 		var r *slackevents.ChallengeResponse
 		err := json.Unmarshal([]byte(body), &r)
