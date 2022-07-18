@@ -10,10 +10,10 @@ import (
 )
 
 var randomMessages = []string{
-	"Did you need me?",
+	"Hello, Mogi. Calm Down. You wanna drink Shiso juice. ",
 	"What's up?",
-	"I'm quite tired...",
-	"I don't wanna work any more",
+	"I wanna be an Iron Man. And you?",
+	"Sleepy.....",
 }
 
 type EventUseCase struct {
@@ -26,7 +26,7 @@ func NewEventUseCase(slackRepository *repository.SlackRepository) *EventUseCase 
 
 func (eu *EventUseCase) InvokeEvent(evt *slackevents.EventsAPIEvent) error {
 	switch evt := evt.InnerEvent.Data.(type) {
-	case *slackevents.MessageEvent:
+	case *slackevents.AppMentionEvent:
 		return eu.slackRepository.PostMessage(evt.Channel, slack.MsgOptionText(randomMessages[rand.Intn(len(randomMessages))], false))
 	default:
 		return fmt.Errorf("this event is not supported : %v", evt)
