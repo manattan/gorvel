@@ -16,15 +16,21 @@ var randomMessages = []string{
 	"Sleepy.....",
 }
 
-type EventUseCase struct {
-	slackRepository *repository.SlackRepository
+type EventUseCase interface {
+	InvokeEvent(evt *slackevents.EventsAPIEvent) error
 }
 
-func NewEventUseCase(slackRepository *repository.SlackRepository) *EventUseCase {
-	return &EventUseCase{slackRepository}
+var _ EventUseCase = &eventUseCase{}
+
+type eventUseCase struct {
+	slackRepository repository.SlackRepository
 }
 
-func (eu *EventUseCase) InvokeEvent(evt *slackevents.EventsAPIEvent) error {
+func NewEventUseCase(slackRepository repository.SlackRepository) *eventUseCase {
+	return &eventUseCase{slackRepository}
+}
+
+func (eu *eventUseCase) InvokeEvent(evt *slackevents.EventsAPIEvent) error {
 	switch evt := evt.InnerEvent.Data.(type) {
 	case *slackevents.AppMentionEvent:
 		return eu.slackRepository.PostMessage(evt.Channel, slack.MsgOptionText(randomMessages[rand.Intn(len(randomMessages))], false))

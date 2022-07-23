@@ -14,11 +14,11 @@ import (
 )
 
 type EventHandler struct {
-	eu            *usecase.EventUseCase
+	eu            usecase.EventUseCase
 	signingSecret string
 }
 
-func NewEventHandler(eu *usecase.EventUseCase, signingSecret string) *EventHandler {
+func NewEventHandler(eu usecase.EventUseCase, signingSecret string) *EventHandler {
 	return &EventHandler{eu, signingSecret}
 }
 
